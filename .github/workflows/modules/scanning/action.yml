@@ -1,0 +1,24 @@
+name: Security Scanner
+
+inputs:
+  target:
+    description: 'Target directory to scan'
+    default: '.'
+  scan_type:
+    description: 'Scan type (kubescape|trivy)'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Kubescape
+      shell: bash
+      run: |
+        curl -s https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash
+        echo "$HOME/.kubescape/bin" >> $GITHUB_PATH
+
+    - name: Run Scan
+      shell: bash
+      run: |
+        ./scripts/kubescape-scan.sh "${{ inputs.target }}"
+        echo "scan-report=$(pwd)/results/kubescape-results.json" >> $GITHUB_OUTPUT
