@@ -1,0 +1,22 @@
+votre-repo/                  # Racine du dépôt
+│
+└── .github/                 # Dossier spécial GitHub
+    │
+    └── workflows/           # Contient tous les workflows
+        │
+        ├── security-pipeline.yml    # Fichier principal
+        │
+        └── modules/         # Modules personnalisés
+            ├── notification/
+            │   ├── action.yml
+            │   └── scripts/
+            │       └── send-alert.sh
+            ├── scanning/
+            │   ├── action.yml
+            │   └── scripts/
+            │       ├── kubescape-scan.sh
+            │       └── trivy-scan.sh
+            └── validation/
+                ├── action.yml
+                └── scripts/
+                    └── godgo-validate.sh
