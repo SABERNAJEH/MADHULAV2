@@ -1,0 +1,41 @@
+name: Security Pipeline
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Script Permissions
+        run: find .github/workflows/modules/ -name "*.sh" -exec chmod +x {} \;
+
+      - name: Run Security Scan
+        uses: ./.github/workflows/modules/scanning
+        with:
+          target: 'kubernetes-goat/'
+          scan_type: 'kubescape'
+
+      - name: Validate with Godgo
+        uses: ./.github/workflows/modules/validation
+        if: success()
+
+      - name: Deploy and Scan
+        uses: ./.github/workflows/modules/validation
+        if: success()
+        with:
+          action: 'deploy-scan'
+
+      - name: Send Notification
+        uses: ./.github/workflows/modules/notification
+        if: always()
+        with:
+          emails: 'dedy@gmail.com,fery@gmail.com'
+          scan_results: '${{ needs.security-scan.outputs.scan-report }}'
