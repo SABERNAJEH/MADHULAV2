@@ -1,0 +1,26 @@
+name: Validation Pipeline
+
+inputs:
+  action:
+    description: 'Action to perform (validate|deploy-scan)'
+    default: 'validate'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y golang-go
+        go install github.com/godgo/godgo@latest
+
+    - name: Run Validation
+      if: inputs.action == 'validate'
+      shell: bash
+      run: ./scripts/godgo-validate.sh
+
+    - name: Deploy and Scan
+      if: inputs.action == 'deploy-scan'
+      shell: bash
+      run: ./scripts/deploy-scan.sh
