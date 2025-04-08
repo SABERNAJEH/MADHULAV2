@@ -1,0 +1,29 @@
+name: Email Notifier
+
+inputs:
+  emails:
+    description: 'Comma-separated email list'
+    required: true
+  scan_results:
+    description: 'Path to scan results'
+    default: ''
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        pip install -r ./scripts/requirements.txt
+
+    - name: Send Alerts
+      run: |
+        python ./scripts/send-alert.py \
+          --emails "${{ inputs.emails }}" \
+          --results "${{ inputs.scan_results }}" \
+          --repo "$GITHUB_REPOSITORY" \
+          --commit "$GITHUB_SHA"
