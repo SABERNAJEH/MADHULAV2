@@ -1,24 +1,26 @@
-name: Security Scanner
+name: Kubernetes Security Scanning
+description: Run security scans on Kubernetes manifests
 
-inputs:
-  target:
-    description: 'Target directory to scan'
-    default: '.'
-  scan_type:
-    description: 'Scan type (kubescape|trivy)'
-    required: true
+outputs:
+  scan-results:
+    description: 'Results of security scans'
+    value: ${{ steps.scan-results.outputs.results }}
 
 runs:
   using: "composite"
   steps:
-    - name: Install Kubescape
-      shell: bash
-      run: |
-        curl -s https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash
-        echo "$HOME/.kubescape/bin" >> $GITHUB_PATH
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-    - name: Run Scan
+    - name: Run Kubescape scan
+      run: ./.github/workflows/modules/scanning/scripts/kubescape-scan.sh
       shell: bash
-      run: |
-        ./scripts/kubescape-scan.sh "${{ inputs.target }}"
-        echo "scan-report=$(pwd)/results/kubescape-results.json" >> $GITHUB_OUTPUT
+
+    - name: Run Trivy scan
+      run: ./.github/workflows/modules/scanning/scripts/trivy-scan.sh
+      shell: bash
+
+    - name: Set scan results output
+      id: scan-results
+      run: echo "results=$(cat scan-results.json)" >> $GITHUB_OUTPUT
+      shell: bash
