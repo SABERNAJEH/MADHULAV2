@@ -1,29 +1,26 @@
-name: Email Notifier
+name: Send Email Notification
+description: Send email notification on repository changes
 
 inputs:
-  emails:
-    description: 'Comma-separated email list'
+  email-to:
+    description: 'Comma-separated list of email recipients'
     required: true
-  scan_results:
-    description: 'Path to scan results'
-    default: ''
 
 runs:
   using: "composite"
   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: Install Dependencies
-      run: |
-        pip install -r ./scripts/requirements.txt
+    - name: Install dependencies
+      run: pip install -r .github/workflows/modules/notification/scripts/requirements.txt
+      shell: bash
 
-    - name: Send Alerts
-      run: |
-        python ./scripts/send-alert.py \
-          --emails "${{ inputs.emails }}" \
-          --results "${{ inputs.scan_results }}" \
-          --repo "$GITHUB_REPOSITORY" \
-          --commit "$GITHUB_SHA"
+    - name: Send notification
+      run: python .github/workflows/modules/notification/scripts/send-alert.py "${{ inputs.email-to }}"
+      shell: bash
