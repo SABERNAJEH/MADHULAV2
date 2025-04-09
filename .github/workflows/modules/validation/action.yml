@@ -1,26 +1,21 @@
-name: Validation Pipeline
+name: Validation and Deployment Scan
+description: Validate Kubernetes manifests and scan deployed resources
 
 inputs:
-  action:
-    description: 'Action to perform (validate|deploy-scan)'
-    default: 'validate'
+  scan-results:
+    description: 'Results from security scans'
+    required: true
 
 runs:
   using: "composite"
   steps:
-    - name: Install Dependencies
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y golang-go
-        go install github.com/godgo/godgo@latest
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-    - name: Run Validation
-      if: inputs.action == 'validate'
+    - name: Run GoDaddy validation
+      run: ./.github/workflows/modules/validation/scripts/godgo-validate.sh
       shell: bash
-      run: ./scripts/godgo-validate.sh
 
-    - name: Deploy and Scan
-      if: inputs.action == 'deploy-scan'
+    - name: Deploy and scan
+      run: ./.github/workflows/modules/validation/scripts/deploy-scan.sh
       shell: bash
-      run: ./scripts/deploy-scan.sh
