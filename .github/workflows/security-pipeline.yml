@@ -1,5 +1,4 @@
 name: Kubernetes Security Pipeline
-
 on:
   push:
     branches: [ master ]
